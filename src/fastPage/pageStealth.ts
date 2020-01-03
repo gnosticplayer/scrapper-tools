@@ -11,6 +11,15 @@ const osEs = ['Win32', 'Linux x86_64', 'MacIntel'];
 const osWeights = [3, 1, 2];
 
 const osChosen = chance.weighted(osEs, osWeights)
+const webgl_chosen = ""
+if (osChosen == "Win32") {
+  webgl_chosen = chance.weighted(windowsWebGls, windowsWeights)
+} else if (osChosen == "MacIntel") {
+  webgl_chosen = chance.weighted(macWebGls, macWeights)
+} else {
+  webgl_chosen = chance.weighted(linuxWebGls, linuxWeights)
+const webgl_vendor = webgl_chosen.spit(":")[0]
+const webgl_renderer = webgl_chosen.spit(":")[1]
 const generateUserAgent = new UserAgent({platform: osChosen, pluginsLength: 3,  vendor: "Google Inc."});
 const fingerprints = Array(1000).fill().map(() => generateUserAgent());
 const fingerprint = fingerprints[Math.floor(Math.random() * fingerprints.length)]
@@ -147,7 +156,7 @@ async function windowScreen(page) {
       get: () => fingerprint.screenHeight,
     })
     Object.defineProperty(window, "innerHeight", {
-      get: () => DIMENSION.height - 74,
+      get: () => DIMENSION.height - chance.integer({ min: 70, max: 140 }),
     })
     Object.defineProperty(window.navigator, "userAgent", {
       get: () => fingerprint.userAgent,
@@ -436,11 +445,11 @@ async function webGlVendor(page) {
           const param = (args || [])[0]
           // UNMASKED_VENDOR_WEBGL
           if (param === 37445) {
-            return "Intel Inc."
+            return webgl_vendor
           }
           // UNMASKED_RENDERER_WEBGL
           if (param === 37446) {
-            return "Intel Iris OpenGL Engine"
+            return webgl_renderer
           }
           try {
             return Reflect.apply(target, thisArg, args)
@@ -643,7 +652,7 @@ async function mediaCodecStealth(page) {
 
 export default async function pageStealth(page) {
   await page.setUserAgent(
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36",
+    fingerprint.userAgent,
   )
 
   await runtimeStealth(page)
@@ -656,5 +665,4 @@ export default async function pageStealth(page) {
   await conssoleDebugStealth(page)
   await iframeStealth(page)
   await mediaCodecStealth(page)
-  await outerWindow(page)
 }
