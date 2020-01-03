@@ -54,6 +54,7 @@ async function browser(instanceName): Promise<Browser> {
         "--disable-background-timer-throttling",
         "--disable-backgrounding-occluded-windows",
         "--disable-renderer-backgrounding",
+        "--lang=en-US,en;q=0.9",
         ...config[instanceName].args,
       ]
 
