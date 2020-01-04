@@ -747,7 +747,7 @@ export default async function pageStealth(page) {
   await page.setUserAgent(
     fingerprint.userAgent,
   )
-
+  await audioContextStealth(page)
   await runtimeStealth(page)
   await consoleDebug(page)
   await navigatorLanguages(page)
